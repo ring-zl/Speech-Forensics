@@ -1,0 +1,84 @@
+dataset_name: wav2vec2
+devices: ['cuda:4'] # default: single gpu
+dataset: {
+
+  # label_file
+  train_label_file: ./data/train.txt,
+  test_label_file: ./data/dev.txt,
+  open_set: False,
+  priori_dict: ,
+  # priori_dict: {'overflow': 0, 'tacotron2-DCA': 1, 'neural_hmm': 2, 'vits_FreeVC': 3,'DDC_ph_FreeVC': 4,'glow-tts_FreeVC': 4,'glow-tts': 4,'tacotron-DDC_ph':4,'vits': 4,'your_tts': 4},
+  # num_classes: 20,
+  num_classes: 7,
+
+  # feat_folder: ./data/thumos/i3d_features,
+  wav_folder: /data/jzl/SpeechForensics/seen/,
+  # wav_folder: /data/jzl/SpeechForensics/seen/,
+
+  # type of feature ( WAV2VEC2_BASE|WAVLM_BASE|WAV2VEC2_LARGE|WAVLM_LARGE|None)
+  ssl_model: WAV2VEC2_BASE,
+
+  # type of feature ( MFCC|LFCC)
+  hand_craft: ,
+
+  file_prefix: ,
+  # file_ext: .npy,
+  file_ext: .wav,
+  isAllFeatureMapsUsed: False,
+  onlychannel: False,
+  featureMapIndex: 0,
+
+  # input_dim: 2048,
+  input_dim: 768,
+
+  feat_stride: 1,
+  num_frames: 1,
+  # serve as data augmentation
+  trunc_thresh: 0.5,
+  crop_ratio: [0.9, 1.0],
+  
+  # max_seq_len: 2304,
+  max_seq_len: 512,
+}
+model: {
+
+  # type of backbone (convTransformer | conv)
+  backbone_type: 'convTransformer',
+  # type of FPN (fpn | identity)
+  fpn_type: fpn,
+  max_buffer_len_factor: 16.0,
+  # local mha attention
+  n_mha_win_size: -1,
+
+  use_abs_pe: False,
+  # use rel position encoding (added to self-attention)
+  use_rel_pe: False,
+  use_lstm : True,
+  with_Difference : True
+}
+opt: {
+  learning_rate: 0.001,
+  epochs: 90,
+  weight_decay: 0.001,
+}
+loader: {
+  batch_size: 32,
+}
+train_cfg: {
+  init_loss_norm: 100,
+  clip_grad_l2norm: 1.0,
+  cls_prior_prob: 0.01,
+  center_sample: radius,
+  center_sample_radius: 1.5,
+}
+test_cfg: {
+  voting_thresh: 0.7,
+  pre_nms_topk: 2000,
+  max_seg_num: 10, #最大段
+  min_score: 0.9,  #置信度阈值
+  iou_threshold: 0.01,
+  multiclass_nms: True,
+  nms_method: 'hard', # soft | hard | none
+  pre_nms_thresh: 0.001,
+}
+output_folder: ./ckpt/

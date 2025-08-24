@@ -1,0 +1,79 @@
+dataset_name: ADD2023
+devices: ['cuda:5'] # default: single gpu
+dataset: {
+
+  # json_file: ./data/thumos/annotations/thumos14.json,
+  train_label_file: ./data/add_train.txt,
+  test_label_file: ./data/add_dev.txt,
+  # feat_folder: ./data/thumos/i3d_features,
+  # wav_folder: /data/jzl/ADD2023/ADD2023_train/wav/,
+  wav_folder: /data/jzl/ADD2023/ADD2023_train/wav/wav2vec_12channels/,
+  # wav_folder: /data/jzl/SpeechForensics/seen/,
+
+  ssl_model: WAV2VEC2_BASE,
+
+  file_prefix: ,
+  # file_ext: .wav,
+  file_ext: .npy,
+  isAllFeatureMapsUsed: False,
+  featureMapIndex: 0,
+
+  # num_classes: 20,
+  num_classes: 1,
+  
+  # input_dim: 2048,
+  input_dim: 768,
+
+  feat_stride: 1,
+  num_frames: 1,
+  # serve as data augmentation
+  trunc_thresh: 0.5,
+  crop_ratio: [0.9, 1.0],
+  
+  # max_seq_len: 2304,
+  max_seq_len: 512,
+}
+model: {
+
+  # type of backbone (convTransformer | conv)
+  "backbone_type": 'convTransformer',
+  fpn_type: fpn,
+  max_buffer_len_factor: 50.0,
+  n_mha_win_size: -1,
+
+  "use_abs_pe": False,
+  # use rel position encoding (added to self-attention)
+  "use_rel_pe": False,
+  use_lstm : True,
+  with_Difference : True
+}
+opt: {
+  learning_rate: 0.001,
+  epochs: 90,
+  weight_decay: 0.001,
+}
+loader: {
+  batch_size: 16,
+}
+train_cfg: {
+  init_loss_norm: 100,
+  clip_grad_l2norm: 1.0,
+  cls_prior_prob: 0.01,
+  center_sample: radius,
+  center_sample_radius: 1.5,
+}
+test_cfg: {
+  voting_thresh: 0.7,
+  pre_nms_topk: 2000,
+  max_seg_num: 10, #最大段
+  min_score: 0.001,  #置信度阈值
+  "iou_threshold": 0.01,
+  # when using external scores, our model is generating "proposals"
+  # multiclass_nms: False,
+  # ext_score_file: ./data/thumos/annotations/thumos14_cls_scores.pkl,
+  # comment out L47-48 and uncomment L50 to disable score fusion
+  multiclass_nms: True,
+  "nms_method": 'soft', # soft | hard | none
+  "pre_nms_thresh": 0.001,
+}
+output_folder: ./ckpt/
